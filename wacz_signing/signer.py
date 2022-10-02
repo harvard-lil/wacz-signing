@@ -107,7 +107,7 @@ def sign(string, dt):
     check_range(dt, timestamp, stamp_duration, SigningException)
 
     return {
-        'software': f"signing {__version__}",
+        'software': f"wacz-signing {__version__}",
         'hash': string,
         'created': dt,
         'signature': signature,

@@ -1,7 +1,7 @@
 import pytest
 import subprocess
 import os
-from signing.signer import sign, verify, SigningException
+from wacz_signing.signer import sign, verify, SigningException
 from datetime import datetime, timedelta
 
 

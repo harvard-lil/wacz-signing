@@ -20,10 +20,8 @@ and its requirements, something like this:
 ```
 python3 -m venv env
 . env/bin/activate
-pip install git+https://github.com/harvard-lil/signing#egg=signing
+pip install wacz-signing
 ```
-
-Stay tuned for a package at PyPI.
 
 Use
 ---
@@ -36,7 +34,7 @@ accommodate the possibility that the domain name we care about is not
 the one that was originally used to create the cert.) Then, you can
 
 ```
->>> from signing import signer
+>>> from wacz_signing import signer
 >>> result = signer.sign('hello world!', datetime.utcnow())
 >>> signer.verify(result)
 INFO:root:Signing software: signing 0.1.0
