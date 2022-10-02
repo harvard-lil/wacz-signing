@@ -15,7 +15,7 @@ from cryptography.x509.oid import NameOID, ExtensionOID
 import binascii
 import pem
 from ._version import __version__
-
+from .material import ts_chain
 
 load_dotenv()
 
@@ -67,10 +67,10 @@ def sign(string, dt):
             except Exception as e:
                 raise SigningException(f'Failed to load private key: {e}')
 
-    # prepare timestamper
-    ts_cert = os.getenv('TS_CERT')
-    if not ts_cert:
-        ts_certfile = os.getenv('TS_CERTFILE', 'ts-chain.pem')
+    # prepare timestamper; TS_CERTFILE trumps TS_CERT
+    ts_cert = os.getenv('TS_CERT', ts_chain.encode("ascii"))
+    ts_certfile = os.getenv('TS_CERTFILE')
+    if ts_certfile:
         try:
             with open(ts_certfile, 'rb') as f:
                 ts_cert = f.read()
