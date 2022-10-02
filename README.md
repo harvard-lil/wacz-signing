@@ -1,5 +1,5 @@
-signing
-=======
+wacz-signing
+============
 
 This package builds on work by Ilya Kreymer and Webrecorder in
 [authsign](https://github.com/webrecorder/authsign). It is intended
