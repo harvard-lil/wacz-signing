@@ -57,7 +57,29 @@ You may want to catch `signer.SigningException` and
 `signer.VerificationException`.
 
 For local development and testing, you'll need to install
-[mkcert](https://github.com/FiloSottile/mkcert).
+[mkcert](https://github.com/FiloSottile/mkcert). To generate certs,
+you might run
+
+```
+mkcert -cert-file cert.pem -key-file key.pem example.org
+cp cert.pem fullchain.pem
+cat "$(mkcert -CAROOT)/rootCA.pem" >> fullchain.pem
+```
+
+and then set up `.env` like this:
+
+```
+DOMAIN=example.org
+CERTFILE=fullchain.pem
+KEYFILE=key.pem
+CERT_ROOTS=<root CA fingerprint>
+```
+
+where you get the value for `CERT_ROOTS` by running
+
+```
+openssl x509 -noout -in "`mkcert -CAROOT`"/rootCA.pem -fingerprint -sha256 | cut -f 2 -d '=' | sed 's/://g' | awk '{print tolower($0)}'
+```
 
 Certificate management
 ----------------------
