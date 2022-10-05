@@ -4,7 +4,7 @@ import logging
 
 import rfc3161ng
 import base64
-import datetime
+from datetime import datetime, timedelta
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
@@ -14,6 +14,8 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID, ExtensionOID
 import binascii
 import pem
+import zipfile
+import json
 from ._version import __version__
 from .material import ts_chain
 
@@ -23,9 +25,23 @@ logging.basicConfig(level=logging.DEBUG
                     if os.getenv('LOGLEVEL') == 'DEBUG'
                     else logging.INFO)
 
-stamp_duration = datetime.timedelta(
+stamp_duration = timedelta(
     minutes=int(os.getenv('STAMP_DURATION', '10'))
 )
+
+
+def verify_wacz(wacz):
+    """ Verify the signature in a WACZ file """
+
+    with zipfile.ZipFile(wacz) as z:
+        for filename in z.namelist():
+            if filename != "datapackage-digest.json":
+                continue
+
+        file = z.open(filename)
+        data = json.loads(file.read())
+
+        return verify(data["signedData"])
 
 
 def sign(string, dt):
@@ -140,11 +156,11 @@ def verify(signed_req):
     if additional_timestamp_roots:
         timestamp_cert_roots += additional_timestamp_roots.split(',')
 
-    duration = datetime.timedelta(days=int(os.getenv('CERT_DURATION', '7')))
+    duration = timedelta(days=int(os.getenv('CERT_DURATION', '7')))
 
-    logging.info(f'Signing software: {signed_req["software"]}')
+    logging.debug(f'Signing software: {signed_req["software"]}')
 
-    certs = validate_cert_chain(signed_req["domainCert"])
+    certs = validate_cert_chain(ensure_bytes(signed_req["domainCert"]))
 
     cert = certs[0]
 
@@ -153,9 +169,12 @@ def verify(signed_req):
 
     # mkcert does not provide common name or subject alternative name,
     # so we do without, for testing.
-    mkcert = cert.subject.get_attributes_for_oid(
-        NameOID.ORGANIZATION_NAME
-    )[0].value == 'mkcert development certificate'
+    try:
+        mkcert = cert.subject.get_attributes_for_oid(
+            NameOID.ORGANIZATION_NAME
+        )[0].value == 'mkcert development certificate'
+    except IndexError:
+        mkcert = None
     if not mkcert:
         domain = cert.subject.get_attributes_for_oid(
             NameOID.COMMON_NAME
@@ -170,12 +189,14 @@ def verify(signed_req):
         assert domain in domains
         assert signed_req["domain"] in domains
 
-    if cert.not_valid_before > signed_req["created"]:
-        raise VerificationException(
+    created = ensure_dt(signed_req["created"])
+
+    if cert.not_valid_before > created:
+        raise VerificationFailure(
             "signature created before cert existence"
         )
-    if signed_req["created"] > cert.not_valid_before + duration:
-        raise VerificationException(
+    if created > cert.not_valid_before + duration:
+        raise VerificationFailure(
             "signature created after claimed cert duration"
         )
 
@@ -188,19 +209,20 @@ def verify(signed_req):
     # verify timestamp was signed by the existing cert
     rfc3161ng.check_timestamp(
         timestamp_token,
-        certificate=signed_req["timestampCert"],
+        certificate=ensure_bytes(signed_req["timestampCert"]),
         data=signed_req["signature"].encode("ascii"),
         hashname="sha256",
     )
     timestamp = rfc3161ng.get_timestamp(timestamp_token)
 
     if not timestamp:
-        raise VerificationException("unable to verify timestamp")
+        raise VerificationFailure("unable to verify timestamp")
 
-    check_range(signed_req["created"], timestamp, stamp_duration,
-                VerificationException)
+    check_range(created, timestamp, stamp_duration, VerificationFailure)
 
-    timestamp_certs = validate_cert_chain(signed_req["timestampCert"])
+    timestamp_certs = validate_cert_chain(
+        ensure_bytes(signed_req["timestampCert"])
+    )
 
     if not timestamp_certs:
         raise VerificationException("unable to validate timestamper chain")
@@ -210,8 +232,17 @@ def verify(signed_req):
 
     return {
         'observer': ['mkcert'] if mkcert else domains,
+        'software': signed_req['software'],
         'timestamp': timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     }
+
+
+def ensure_bytes(cert):
+    return bytes(cert, encoding='ascii') if isinstance(cert, str) else cert
+
+
+def ensure_dt(ts):
+    return ts if isinstance(ts, datetime) else datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ")  # noqa
 
 
 def get_fingerprint(cert):
@@ -272,7 +303,7 @@ def check_range(dt, timestamp, stamp_duration, exception):
     # dt must be older than timestamp
     # since dt can have fractional seconds and timestamp does not, we
     # offer a second's grace
-    if dt - datetime.timedelta(seconds=1) > timestamp:
+    if dt - timedelta(seconds=1) > timestamp:
         raise exception(f"{dt} is later than timestamp {timestamp}")
 
     # dt must be no older than timestamp than stamp_duration
@@ -286,4 +317,8 @@ class SigningException(BaseException):
 
 
 class VerificationException(BaseException):
+    """ Raise for errors in verification """
+
+
+class VerificationFailure(BaseException):
     """ Raise for errors in verification """

@@ -37,9 +37,16 @@ the one that was originally used to create the cert.) Then, you can
 >>> from wacz_signing import signer
 >>> result = signer.sign('hello world!', datetime.utcnow())
 >>> signer.verify(result)
-INFO:root:Signing software: signing 0.1.0
-{'observer': ['example.org'], 'timestamp': '2022-10-01T19:26:31Z'}
+{'observer': ['mkcert'], 'software': 'wacz-signing 0.2.0', 'timestamp': '2022-10-05T19:03:25Z'}
 ```
+
+or
+
+```
+>>> signer.verify_wacz('valid_signed_example_1.wacz')
+{'observer': ['btrix-sign-test.webrecorder.net'], 'software': 'authsigner 0.3.0', 'timestamp': '2022-01-18T19:00:12Z'}
+```
+
 
 You can also provide cert, key, and timestamper material directly, or
 in alternate files, using environment variables: you MUST provide
@@ -51,8 +58,8 @@ or `TS_CERTFILE` and `TS_URL` and `TS_ROOTS`. You may additionally
 change the `CERT_DURATION` from its default of 7 days, and the
 `STAMP_DURATION` from its default of 10 minutes.
 
-You may want to catch `signer.SigningException` and
-`signer.VerificationException`.
+You may want to catch `signer.SigningException`,
+`signer.VerificationException`, and `signer.VerificationFailure`.
 
 For local development and testing, you'll need to install
 [mkcert](https://github.com/FiloSottile/mkcert). To generate certs,

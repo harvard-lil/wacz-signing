@@ -1,26 +1,41 @@
 import pytest
 import subprocess
 import os
-from wacz_signing.signer import sign, verify, SigningException
+from wacz_signing import signer
 from datetime import datetime, timedelta
 
 
 def test_happy_path(mkcert):
-    result = sign('hello, world', datetime.utcnow())
-    check = verify(result)
+    result = signer.sign('hello, world', datetime.utcnow())
+    check = signer.verify(result)
     assert check['observer'] == ['mkcert']
 
 
 def test_late_signature(mkcert):
-    with pytest.raises(SigningException) as e:
-        sign('hello, world', datetime.utcnow() + timedelta(days=8))
+    with pytest.raises(signer.SigningException) as e:
+        signer.sign('hello, world', datetime.utcnow() + timedelta(days=8))
         assert "is later than timestamp" in str(e.value)
 
 
 def test_early_signature(mkcert):
-    with pytest.raises(SigningException) as e:
-        sign('hello, world', datetime.utcnow() - timedelta(hours=1))
+    with pytest.raises(signer.SigningException) as e:
+        signer.sign('hello, world', datetime.utcnow() - timedelta(hours=1))
         assert "older than timestamp" in str(e.value)
+
+
+def test_file_verification():
+    result = signer.verify_wacz('valid_signed_example_1.wacz')
+    assert result == {
+        'observer': ['btrix-sign-test.webrecorder.net'],
+        'software': 'authsigner 0.3.0',
+        'timestamp': '2022-01-18T19:00:12Z'
+    }
+
+
+def test_invalid_file_verification():
+    with pytest.raises(signer.VerificationException) as e:
+        signer.verify_wacz('invalid_signed_example_1.wacz')
+        assert "Cert fingerprint is not in chain" in str(e.value)
 
 
 @pytest.fixture
