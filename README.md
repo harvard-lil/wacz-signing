@@ -35,16 +35,17 @@ the one that was originally used to create the cert.) Then, you can
 
 ```
 >>> from wacz_signing import signer
+>>> from datetime import datetime
 >>> result = signer.sign('hello world!', datetime.utcnow())
 >>> signer.verify(result)
-{'observer': ['mkcert'], 'software': 'wacz-signing 0.2.0', 'timestamp': '2022-10-05T19:03:25Z'}
+{'observer': ['mkcert'], 'software': 'wacz-signing 0.2.3', 'timestamp': '2022-10-05T20:40:58.000000Z'}
 ```
 
 or
 
 ```
->>> signer.verify_wacz('valid_signed_example_1.wacz')
-{'observer': ['btrix-sign-test.webrecorder.net'], 'software': 'authsigner 0.3.0', 'timestamp': '2022-01-18T19:00:12Z'}
+>>> signer.verify_wacz('test_files/valid_signed_example_1.wacz')
+{'observer': ['btrix-sign-test.webrecorder.net'], 'software': 'authsigner 0.3.0', 'timestamp': '2022-01-18T19:00:12.000000Z'}
 ```
 
 
