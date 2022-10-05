@@ -28,7 +28,7 @@ def test_file_verification():
     assert result == {
         'observer': ['btrix-sign-test.webrecorder.net'],
         'software': 'authsigner 0.3.0',
-        'timestamp': '2022-01-18T19:00:12Z'
+        'timestamp': '2022-01-18T19:00:12.000000Z'
     }
 
 
@@ -36,6 +36,25 @@ def test_invalid_file_verification():
     with pytest.raises(signer.VerificationException) as e:
         signer.verify_wacz('test_files/invalid_signed_example_1.wacz')
         assert "Cert fingerprint is not in chain" in str(e.value)
+
+
+def test_unsigned_file():
+    with pytest.raises(signer.VerificationException) as e:
+        signer.verify_wacz('test_files/not-signed.wacz')
+        assert "is unsigned" in str(e.value)
+
+
+def test_file_illformed_digest():
+    with pytest.raises(signer.VerificationException) as e:
+        signer.verify_wacz('test_files/ill-digest.wacz')
+        assert "digest is ill-formed" in str(e.value)
+
+
+@pytest.mark.xfail(reason="We're still looking for a WACZ with no digest")
+def test_file_no_digest():
+    with pytest.raises(signer.VerificationException) as e:
+        signer.verify_wacz('test_files/no-digest.wacz')
+        assert "is missing datapackage-digest.json" in str(e.value)
 
 
 @pytest.fixture

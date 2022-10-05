@@ -39,9 +39,17 @@ def verify_wacz(wacz):
                 continue
 
         file = z.open(filename)
-        data = json.loads(file.read())
+        try:
+            data = json.loads(file.read())
+        except json.JSONDecodeError as e:
+            raise VerificationException(f"digest is ill-formed: {e}")
 
-        return verify(data["signedData"])
+        try:
+            return verify(data["signedData"])
+        except KeyError:
+            raise VerificationException(f"{wacz} is unsigned")
+
+    return VerificationException(f"{wacz} is missing datapackage-digest.json")
 
 
 def sign(string, dt):
@@ -233,7 +241,7 @@ def verify(signed_req):
     return {
         'observer': ['mkcert'] if mkcert else domains,
         'software': signed_req['software'],
-        'timestamp': timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+        'timestamp': timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     }
 
 
@@ -242,7 +250,12 @@ def ensure_bytes(cert):
 
 
 def ensure_dt(ts):
-    return ts if isinstance(ts, datetime) else datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ")  # noqa
+    if isinstance(ts, datetime):
+        return ts
+    try:
+        return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%fZ")
+    except ValueError:
+        return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ")
 
 
 def get_fingerprint(cert):
