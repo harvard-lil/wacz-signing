@@ -24,7 +24,7 @@ def test_early_signature(mkcert):
 
 
 def test_file_verification():
-    result = signer.verify_wacz('valid_signed_example_1.wacz')
+    result = signer.verify_wacz('test_files/valid_signed_example_1.wacz')
     assert result == {
         'observer': ['btrix-sign-test.webrecorder.net'],
         'software': 'authsigner 0.3.0',
@@ -34,7 +34,7 @@ def test_file_verification():
 
 def test_invalid_file_verification():
     with pytest.raises(signer.VerificationException) as e:
-        signer.verify_wacz('invalid_signed_example_1.wacz')
+        signer.verify_wacz('test_files/invalid_signed_example_1.wacz')
         assert "Cert fingerprint is not in chain" in str(e.value)
 
 
