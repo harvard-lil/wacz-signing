@@ -3,6 +3,10 @@ import subprocess
 import os
 from wacz_signing import signer
 from datetime import datetime, timedelta
+from pathlib import Path
+
+
+t = Path('tests/test_files')
 
 
 def test_happy_path(mkcert):
@@ -24,7 +28,7 @@ def test_early_signature(mkcert):
 
 
 def test_file_verification():
-    result = signer.verify_wacz('test_files/valid_signed_example_1.wacz')
+    result = signer.verify_wacz(t / 'valid_signed_example_1.wacz')
     assert result == {
         'observer': ['btrix-sign-test.webrecorder.net'],
         'software': 'authsigner 0.3.0',
@@ -34,26 +38,26 @@ def test_file_verification():
 
 def test_invalid_file_verification():
     with pytest.raises(signer.VerificationException) as e:
-        signer.verify_wacz('test_files/invalid_signed_example_1.wacz')
+        signer.verify_wacz(t / 'invalid_signed_example_1.wacz')
         assert "Cert fingerprint is not in chain" in str(e.value)
 
 
 def test_unsigned_file():
     with pytest.raises(signer.VerificationException) as e:
-        signer.verify_wacz('test_files/not-signed.wacz')
+        signer.verify_wacz(t / 'not-signed.wacz')
         assert "is unsigned" in str(e.value)
 
 
 def test_file_illformed_digest():
     with pytest.raises(signer.VerificationException) as e:
-        signer.verify_wacz('test_files/ill-digest.wacz')
+        signer.verify_wacz(t / 'ill-digest.wacz')
         assert "digest is ill-formed" in str(e.value)
 
 
 @pytest.mark.xfail(reason="We're still looking for a WACZ with no digest")
 def test_file_no_digest():
     with pytest.raises(signer.VerificationException) as e:
-        signer.verify_wacz('test_files/no-digest.wacz')
+        signer.verify_wacz(t / 'no-digest.wacz')
         assert "is missing datapackage-digest.json" in str(e.value)
 
 
