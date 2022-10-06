@@ -65,7 +65,7 @@ def test_file_no_digest():
 def mkcert(tmp_path):
     # set up cert and environment
     cmd = 'echo "$(mkcert -CAROOT)/rootCA.pem"'
-    root_ca = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+    root_ca = subprocess.check_output(cmd, shell=True).decode("ascii").strip()
 
     cmd = f'cp "{root_ca}" .'
     subprocess.call(cmd, shell=True, cwd=tmp_path)
@@ -81,7 +81,7 @@ def mkcert(tmp_path):
     cmd = 'openssl x509 -noout -in rootCA.pem -fingerprint -sha256'
     fingerprint = subprocess.check_output(
         cmd, shell=True, cwd=tmp_path
-    ).decode('utf-8').strip().split('=')[1].replace(':', '').lower()
+    ).decode("ascii").strip().split('=')[1].replace(':', '').lower()
     os.environ['CERT_ROOTS'] = f"{fingerprint}"
 
     yield

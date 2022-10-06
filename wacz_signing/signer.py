@@ -246,7 +246,7 @@ def verify(signed_req):
 
 
 def ensure_bytes(cert):
-    return bytes(cert, encoding='ascii') if isinstance(cert, str) else cert
+    return bytes(cert, encoding="ascii") if isinstance(cert, str) else cert
 
 
 def ensure_dt(ts):
