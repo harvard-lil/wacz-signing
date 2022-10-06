@@ -59,8 +59,8 @@ or `TS_CERTFILE` and `TS_URL` and `TS_ROOTS`. You may additionally
 change the `CERT_DURATION` from its default of 7 days, and the
 `STAMP_DURATION` from its default of 10 minutes.
 
-You may want to catch `signer.SigningException`,
-`signer.VerificationException`, and `signer.VerificationFailure`.
+You may want to catch `signer.SigningException` and
+`signer.VerificationException`.
 
 For local development and testing, you'll need to install
 [mkcert](https://github.com/FiloSottile/mkcert). To generate certs,

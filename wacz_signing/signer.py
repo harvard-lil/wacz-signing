@@ -200,11 +200,11 @@ def verify(signed_req):
     created = ensure_dt(signed_req["created"])
 
     if cert.not_valid_before > created:
-        raise VerificationFailure(
+        raise VerificationException(
             "signature created before cert existence"
         )
     if created > cert.not_valid_before + duration:
-        raise VerificationFailure(
+        raise VerificationException(
             "signature created after claimed cert duration"
         )
 
@@ -224,9 +224,9 @@ def verify(signed_req):
     timestamp = rfc3161ng.get_timestamp(timestamp_token)
 
     if not timestamp:
-        raise VerificationFailure("unable to verify timestamp")
+        raise VerificationException("unable to verify timestamp")
 
-    check_range(created, timestamp, stamp_duration, VerificationFailure)
+    check_range(created, timestamp, stamp_duration, VerificationException)
 
     timestamp_certs = validate_cert_chain(
         ensure_bytes(signed_req["timestampCert"])
@@ -330,8 +330,4 @@ class SigningException(BaseException):
 
 
 class VerificationException(BaseException):
-    """ Raise for errors in verification """
-
-
-class VerificationFailure(BaseException):
     """ Raise for errors in verification """
