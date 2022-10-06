@@ -32,7 +32,7 @@ def test_file_verification():
     assert result == {
         'observer': ['btrix-sign-test.webrecorder.net'],
         'software': 'authsigner 0.3.0',
-        'timestamp': '2022-01-18T19:00:12.000000Z'
+        'timestamp': '2022-01-18T19:00:12Z'
     }
 
 

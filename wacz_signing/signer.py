@@ -241,7 +241,7 @@ def verify(signed_req):
     return {
         'observer': ['mkcert'] if mkcert else domains,
         'software': signed_req['software'],
-        'timestamp': timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        'timestamp': timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     }
 
 
@@ -252,9 +252,7 @@ def ensure_bytes(cert):
 def ensure_dt(ts):
     if isinstance(ts, datetime):
         return ts
-    try:
-        return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S.%fZ")
-    except ValueError:
+    else:
         return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ")
 
 
