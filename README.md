@@ -38,7 +38,7 @@ the one that was originally used to create the cert.) Then, you can
 >>> from datetime import datetime
 >>> result = signer.sign('hello world!', datetime.utcnow())
 >>> signer.verify(result)
-{'observer': ['mkcert'], 'software': 'wacz-signing 0.2.4', 'timestamp': '2022-10-05T20:40:58.000000Z'}
+{'observer': ['mkcert'], 'software': 'wacz-signing 0.2.6', 'timestamp': '2022-10-05T20:40:58.000000Z'}
 ```
 
 or
