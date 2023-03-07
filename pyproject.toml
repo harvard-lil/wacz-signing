@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wacz_signing"
-version = "0.2.7"
+version = "0.2.8"
 description = "A library for signing and timestamping file hashes"
 authors = ["Ben Steinberg <bsteinberg@law.harvard.edu>"]
 readme = "README.md"
