@@ -1,6 +1,8 @@
 wacz-signing
 ============
 
+[![test status](https://github.com/harvard-lil/wacz-signing/actions/workflows/tests.yml/badge.svg)](https://github.com/harvard-lil/wacz-signing/actions)
+
 This package builds on work by Ilya Kreymer and Webrecorder in
 [authsign](https://github.com/webrecorder/authsign). It is intended
 for use in WACZ signing (and to a lesser extent, verification), as set
