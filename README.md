@@ -98,10 +98,9 @@ example may follow.)
 Use cases
 ---------
 
-This package could be used in a tiny API, of course; it could also be
-integrated into a producer of WACZ files, like a future version of
-Perma, which would sign archives internally; it could also be run in a
-lambda, which is why it's possible to provide key material directly in
+This package could be used in a tiny web API, of course; see
+[examples/web-api/](examples/web-api/). It could also be integrated
+into a producer of WACZ files, like a future version of Perma, which
+would sign archives internally; it could also be run in a lambda,
+which is why it's possible to provide key material directly in
 environment variables.
-
-Stay tuned for examples of these uses in a later commit.
