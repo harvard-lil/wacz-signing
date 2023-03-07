@@ -5,7 +5,7 @@ you can run it like this, for development or CI purposes:
 ```
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r no-gunicorn/requirements.txt
+pip install flask wacz-signing
 flask --app app run
 ```
 
@@ -14,7 +14,7 @@ or like this, in a more production-like way:
 ```
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r gunicorn/requirements.txt
+pip install flask wacz-signing gunicorn
 gunicorn -b localhost:8000 -w 4 app:app
 ```
 
