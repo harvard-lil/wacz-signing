@@ -132,6 +132,7 @@ def sign(string, dt):
 
     return {
         'software': f"wacz-signing {__version__}",
+        'version': '0.1.0',
         'hash': string,
         'created': dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
         'signature': signature,
