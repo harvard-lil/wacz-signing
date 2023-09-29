@@ -16,8 +16,10 @@ import binascii
 import pem
 import zipfile
 import json
-from ._version import __version__
+import importlib.metadata
 from .material import ts_chain
+
+__version__ = importlib.metadata.version(__package__)
 
 load_dotenv()
 
