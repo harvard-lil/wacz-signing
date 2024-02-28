@@ -4,7 +4,7 @@ import logging
 
 import rfc3161ng
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
@@ -213,13 +213,13 @@ def verify(signed_req):
         assert domain in domains
         assert signed_req["domain"] in domains
 
-    created = ensure_dt(signed_req["created"])
+    created = ensure_dt(signed_req["created"]).replace(tzinfo=timezone.utc)
 
-    if cert.not_valid_before > created:
+    if cert.not_valid_before_utc > created:
         raise VerificationException(
             "signature created before cert existence"
         )
-    if created > cert.not_valid_before + duration:
+    if created > cert.not_valid_before_utc + duration:
         raise VerificationException(
             "signature created after claimed cert duration"
         )
@@ -327,6 +327,9 @@ def validate_cert(cert, public_key):
 
 
 def check_range(dt, timestamp, stamp_duration, exception):
+    dt = dt.replace(tzinfo=timezone.utc)
+    timestamp = timestamp.replace(tzinfo=timezone.utc)
+
     # dt must be older than timestamp
     # since dt can have fractional seconds and timestamp does not, we
     # offer a second's grace
