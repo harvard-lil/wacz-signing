@@ -114,14 +114,27 @@ def sign(string, dt):
     except Exception as e:
         raise SigningException(f'Failed to create timestamper: {e}')
 
-    # create the signature
-    signature = base64.b64encode(
-        private_key.sign(
+    # sign the key; the type of the key can vary, and the types can take
+    # different kwargs -- see
+    # https://github.com/pyca/cryptography/issues/10237 --
+    # so:
+    try:
+        # RSAPrivateKey
+        signed = private_key.sign(
+            string.encode("ascii"),
+            algorithm=hashes.SHA256(),
+            padding=padding.PKCS1v15()
+        )
+    except TypeError:
+        # ECPrivateKey
+        signed = private_key.sign(
             string.encode("ascii"),
             signature_algorithm=hashes.SHA256(),
             padding=padding.PKCS1v15()
         )
-    ).decode("ascii")
+
+    # create the signature
+    signature = base64.b64encode(signed).decode("ascii")
 
     # create the time signature
     tsr = timestamper(signature.encode("ascii"), return_tsr=True)
