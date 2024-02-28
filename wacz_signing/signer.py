@@ -118,7 +118,7 @@ def sign(string, dt):
     signature = base64.b64encode(
         private_key.sign(
             string.encode("ascii"),
-            algorithm=hashes.SHA256(),
+            signature_algorithm=hashes.SHA256(),
             padding=padding.PKCS1v15()
         )
     ).decode("ascii")
