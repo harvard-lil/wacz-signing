@@ -114,22 +114,20 @@ def sign(string, dt):
     except Exception as e:
         raise SigningException(f'Failed to create timestamper: {e}')
 
-    # sign the key; the type of the key can vary, and the types can take
-    # different kwargs -- see
-    # https://github.com/pyca/cryptography/issues/10237 --
-    # so:
-    try:
-        # RSAPrivateKey
+    # sign the string with the private key; the type of the key can vary,
+    # and the types can take different kwargs -- see
+    # https://github.com/pyca/cryptography/issues/10237 -- and letsencrypt
+    # has switched from RSA to ECDSA, so:
+    if isinstance(private_key, ec.EllipticCurvePrivateKey):
+        signed = private_key.sign(
+            string.encode("ascii"),
+            signature_algorithm=ec.ECDSA(hashes.SHA256())
+        )
+    elif isinstance(private_key, rsa.RSAPrivateKey):
         signed = private_key.sign(
             string.encode("ascii"),
             algorithm=hashes.SHA256(),
             padding=padding.PKCS1v15()
-        )
-    except TypeError:
-        # ECPrivateKey
-        signed = private_key.sign(
-            string.encode("ascii"),
-            signature_algorithm=hashes.SHA256()
         )
 
     # create the signature
