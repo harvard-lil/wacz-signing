@@ -129,8 +129,7 @@ def sign(string, dt):
         # ECPrivateKey
         signed = private_key.sign(
             string.encode("ascii"),
-            signature_algorithm=hashes.SHA256(),
-            padding=padding.PKCS1v15()
+            signature_algorithm=hashes.SHA256()
         )
 
     # create the signature
